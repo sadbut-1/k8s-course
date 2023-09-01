@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goserver
+spec:
+  selector:
+    matchLabels:
+      app: goserver
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: goserver
+    spec:
+      containers:
+      - name: goserver
+        image: "eduardomoya/hello-go:latest"
+
+        resources:
+          requests:
+            cpu: 100m
+            memory: 20Mi
+          limits:
+            cpu: 200m
+            memory: 40Mi
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          periodSeconds: 5 # Tempo de verificação
+          failureThreshold: 3 # reinicia após X tentativas
+          timeoutSeconds: 2 # Tempo para timeout
+          successThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 10 # Aguarde X segundos antes de começar a verificar
+        startupProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          periodSeconds: 3
+          failureThreshold: 30
+        envFrom:
+          - configMapRef:
+              name: goserver-env
+          - secretRef:
+              name: goserver-secret
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+
+# kubectl get deployments
+# kubectl apply -f k8s/deployment.yaml && watch -n1 kubectl get pods   (&& watch -n1 kubectl get pods é opcional)
+# Deployment: Cria o pod através do template (linha 10). Cria o replicaset determinando o numero de replicas
+# dos pods (linha 9). Reinicia os pods automaticamente a cada nova alteração no arquivo aplicada

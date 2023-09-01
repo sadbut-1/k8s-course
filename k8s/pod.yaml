@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: goserver
+  labels:
+    pod: goserver
+spec:
+  containers:
+  - name: goserver
+    image: "eduardomoya/hello-go:latest"
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+
+# kubectl get pods
